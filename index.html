@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>アムズコーポレーション株式会社</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@300;400;500;700&display=swap" rel="stylesheet">
+    
+    <!-- React & ReactDOM (CDN) -->
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    
+    <!-- Babel (JSX変換用) -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+    <style>
+        /* カスタムアニメーション */
+        @keyframes fade-in-up {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes slow-zoom {
+            from { transform: scale(1); }
+            to { transform: scale(1.1); }
+        }
+        .animate-fade-in-up { animation: fade-in-up 0.8s ease-out forwards; }
+        .delay-100 { animation-delay: 0.1s; }
+        .delay-200 { animation-delay: 0.2s; }
+        .delay-300 { animation-delay: 0.3s; }
+        .animate-slow-zoom { animation: slow-zoom 20s linear infinite alternate; }
+        
+        /* フォント適用 */
+        body { font-family: "Noto Serif JP", "Hiragino Mincho ProN", serif; }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+
+        // --- アイコンコンポーネント (Lucide Reactの代わり) ---
+        const IconBase = ({ children, size = 24, className = "" }) => (
+            <svg 
+                xmlns="http://www.w3.org/2000/svg" 
+                width={size} 
+                height={size} 
+                viewBox="0 0 24 24" 
+                fill="none" 
+                stroke="currentColor" 
+                strokeWidth="2" 
+                strokeLinecap="round" 
+                strokeLinejoin="round" 
+                className={className}
+            >
+                {children}
+            </svg>
+        );
+
+        const Menu = (props) => <IconBase {...props}><line x1="4" x2="20" y1="12" y2="12"/><line x1="4" x2="20" y1="6" y2="6"/><line x1="4" x2="20" y1="18" y2="18"/></IconBase>;
+        const X = (props) => <IconBase {...props}><path d="M18 6 6 18"/><path d="m6 6 18 18"/></IconBase>;
+        const Sun = (props) => <IconBase {...props}><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></IconBase>;
+        const Moon = (props) => <IconBase {...props}><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></IconBase>;
+        const Globe = (props) => <IconBase {...props}><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/></IconBase>;
+        const Building2 = (props) => <IconBase {...props}><path d="M6 22V4a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v18Z"/><path d="M6 12H4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h2"/><path d="M18 9h2a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-2"/><path d="M10 6h4"/><path d="M10 10h4"/><path d="M10 14h4"/><path d="M10 18h4"/></IconBase>;
+        const Sparkles = (props) => <IconBase {...props}><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275Z"/></IconBase>;
+        const FlaskConical = (props) => <IconBase {...props}><path d="M10 2v7.527a2 2 0 0 1-.211.896L4.72 20.55a1 1 0 0 0 .9 1.45h12.76a1 1 0 0 0 .9-1.45l-5.069-10.127A2 2 0 0 1 14 9.527V2"/><path d="M8.5 2h7"/><path d="M7 16h10"/></IconBase>;
+        const ArrowRight = (props) => <IconBase {...props}><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></IconBase>;
+        const MapPin = (props) => <IconBase {...props}><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></IconBase>;
+        const Mail = (props) => <IconBase {...props}><rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></IconBase>;
+        const Phone = (props) => <IconBase {...props}><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></IconBase>;
+        const ChevronDown = (props) => <IconBase {...props}><path d="m6 9 6 6 6-6"/></IconBase>;
+
+        // --- メインアプリケーション ---
+        const App = () => {
+            const [isDarkMode, setIsDarkMode] = useState(false);
+            const [isMenuOpen, setIsMenuOpen] = useState(false);
+            const [scrolled, setScrolled] = useState(false);
+
+            useEffect(() => {
+                const handleScroll = () => {
+                    setScrolled(window.scrollY > 50);
+                };
+                window.addEventListener('scroll', handleScroll);
+                return () => window.removeEventListener('scroll', handleScroll);
+            }, []);
+
+            const theme = {
+                light: {
+                    bg: 'bg-[#FCFCFC]',
+                    card: 'bg-white',
+                    text: 'text-[#2C3E50]',
+                    subText: 'text-[#546e7a]',
+                    border: 'border-slate-100',
+                    navBg: 'bg-white/90',
+                    shadow: 'shadow-xl shadow-slate-200/40'
+                },
+                dark: {
+                    bg: 'bg-[#1a252f]',
+                    card: 'bg-[#2C3E50]',
+                    text: 'text-[#ECF0F1]',
+                    subText: 'text-slate-300',
+                    border: 'border-slate-600',
+                    navBg: 'bg-[#2C3E50]/95',
+                    shadow: 'shadow-lg shadow-black/30'
+                },
+                accent: 'text-[#C0392B]', 
+                accentBg: 'bg-[#C0392B]',
+                primary: 'text-[#2C3E50]',
+                primaryBg: 'bg-[#2C3E50]',
+            };
+
+            const currentTheme = isDarkMode ? theme.dark : theme.light;
+
+            return (
+                <div className={`min-h-screen transition-colors duration-500 ${currentTheme.bg} ${currentTheme.text} selection:bg-[#C0392B] selection:text-white`}>
+                    
+                    {/* Navigation */}
+                    <nav className={`fixed w-full z-50 transition-all duration-500 ${scrolled ? `${currentTheme.navBg} shadow-sm py-4 backdrop-blur-md` : 'bg-transparent py-6'}`}>
+                        <div className="max-w-7xl mx-auto px-6 flex justify-between items-center">
+                            <a href="#" className="flex items-center gap-3 group">
+                                <div className={`w-10 h-10 ${theme.accentBg} text-white rounded-sm flex items-center justify-center font-serif font-bold text-xl shadow-md transition-transform duration-500 group-hover:rotate-45`}>
+                                    A
+                                </div>
+                                <span className={`text-xl font-bold tracking-widest ${scrolled || isDarkMode ? currentTheme.text : 'text-white drop-shadow-md'}`}>
+                                    Ams Corp.
+                                </span>
+                            </a>
+                            
+                            <div className={`hidden md:flex space-x-10 items-center font-medium tracking-wide ${scrolled || isDarkMode ? currentTheme.text : 'text-white drop-shadow-md'}`}>
+                                {['About', 'Business', 'Company', 'Contact'].map((item) => (
+                                    <a key={item} href={`#${item.toLowerCase()}`} className="hover:text-[#C0392B] transition-colors relative group">
+                                        {item}
+                                        <span className="absolute -bottom-2 left-0 w-0 h-[1px] bg-[#C0392B] transition-all duration-300 group-hover:w-full"></span>
+                                    </a>
+                                ))}
+                                <button 
+                                    onClick={() => setIsDarkMode(!isDarkMode)} 
+                                    className={`p-2 rounded-full hover:bg-white/20 transition ${scrolled || isDarkMode ? currentTheme.text : 'text-white'}`}
+                                    aria-label="Toggle Dark Mode"
+                                >
+                                    {isDarkMode ? <Sun size={18} /> : <Moon size={18} />}
+                                </button>
+                            </div>
+
+                            <div className="md:hidden flex items-center gap-4">
+                                <button 
+                                    onClick={() => setIsDarkMode(!isDarkMode)} 
+                                    className={`p-2 rounded-full ${scrolled || isDarkMode ? currentTheme.text : 'text-white'}`}
+                                >
+                                    {isDarkMode ? <Sun size={20} /> : <Moon size={20} />}
+                                </button>
+                                <button 
+                                    className={scrolled || isDarkMode ? currentTheme.text : 'text-white drop-shadow-md'} 
+                                    onClick={() => setIsMenuOpen(!isMenuOpen)}
+                                >
+                                    {isMenuOpen ? <X /> : <Menu />}
+                                </button>
+                            </div>
+                        </div>
+
+                        {isMenuOpen && (
+                            <div className={`absolute top-full left-0 w-full ${isDarkMode ? 'bg-[#2C3E50]' : 'bg-white'} border-t ${currentTheme.border} shadow-xl py-8 px-6 flex flex-col space-y-6 md:hidden animate-fade-in-down`}>
+                                {['About', 'Business', 'Company', 'Contact'].map((item) => (
+                                    <a 
+                                        key={item} 
+                                        href={`#${item.toLowerCase()}`} 
+                                        onClick={() => setIsMenuOpen(false)} 
+                                        className={`block text-lg font-serif tracking-widest ${currentTheme.text}`}
+                                    >
+                                        {item}
+                                    </a>
+                                ))}
+                            </div>
+                        )}
+                    </nav>
+
+                    {/* Hero Section */}
+                    <section id="about" className="relative h-screen flex items-center justify-center overflow-hidden">
+                        <div className="absolute inset-0 z-0">
+                            <img 
+                                src="https://images.unsplash.com/photo-1493976040374-85c8e12f0c0e?auto=format&fit=crop&q=80&w=2070" 
+                                alt="Kyoto Yasaka Pagoda" 
+                                className="w-full h-full object-cover animate-slow-zoom"
+                            />
+                            <div className={`absolute inset-0 ${isDarkMode ? 'bg-[#1a252f]/70' : 'bg-[#2C3E50]/40'}`}></div>
+                            <div className="absolute inset-0 bg-gradient-to-t from-white/10 to-transparent"></div>
+                        </div>
+
+                        <div className="relative z-10 max-w-5xl mx-auto px-6 text-center text-white">
+                            <div className="inline-block px-6 py-2 mb-8 border border-white/40 rounded-sm bg-white/10 backdrop-blur-md text-sm tracking-[0.2em] animate-fade-in-up">
+                                GLOBAL SOLUTION FROM KYOTO
+                            </div>
+                            <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold mb-8 leading-tight tracking-wide animate-fade-in-up delay-100 drop-shadow-lg">
+                                伝統と革新の融合。<br />
+                                <span className="text-red-100 font-light">日本の美</span>を世界へ。
+                            </h1>
+                            <p className="text-lg md:text-xl mb-12 opacity-95 max-w-2xl mx-auto font-light leading-loose tracking-wider animate-fade-in-up delay-200 drop-shadow-md">
+                                アムズコーポレーションは、<br className="md:hidden"/>プロダクト開発から観光、空間プロデュースまで。<br />
+                                多角的な視点で、人々のライフスタイルに<br className="md:hidden"/>新たな価値を創造します。
+                            </p>
+                            <div className="flex flex-col sm:flex-row gap-5 justify-center animate-fade-in-up delay-300">
+                                <a href="#business" className={`px-10 py-4 ${theme.accentBg} text-white rounded-sm hover:brightness-110 transition shadow-xl flex items-center justify-center tracking-widest`}>
+                                    事業内容を見る <ArrowRight className="ml-3" size={18} />
+                                </a>
+                                <a href="#contact" className="px-10 py-4 bg-white text-[#2C3E50] rounded-sm font-bold hover:bg-gray-100 transition shadow-xl flex items-center justify-center tracking-widest">
+                                    お問い合わせ
+                                </a>
+                            </div>
+                        </div>
+                        
+                        <div className="absolute bottom-10 left-1/2 transform -translate-x-1/2 text-white/70 animate-bounce">
+                            <ChevronDown size={32} strokeWidth={1} />
+                        </div>
+                    </section>
+
+                    {/* Business Section */}
+                    <section id="business" className="py-32 relative">
+                        <div className="max-w-7xl mx-auto px-6">
+                            <div className="text-center mb-24">
+                                <span className={`block text-sm font-bold tracking-[0.3em] ${theme.accent} mb-3`}>OUR BUSINESS</span>
+                                <h2 className="text-3xl md:text-4xl font-bold mb-6 tracking-wide">事業内容</h2>
+                                <p className={`mt-6 ${currentTheme.subText} max-w-2xl mx-auto leading-loose`}>
+                                    「衣・食・住・美」に関わる幅広い領域で事業を展開。<br/>
+                                    京都の美意識をベースに、グローバルな視点でソリューションを提供します。
+                                </p>
+                            </div>
+
+                            <div className="space-y-32">
+                                {/* Business 1: Product Development - Updated with User Image */}
+                                <div className="flex flex-col md:flex-row items-center gap-16 group">
+                                    <div className="md:w-1/2 relative p-4">
+                                        <div className="relative rounded-sm shadow-2xl bg-white transition-all duration-300 hover:shadow-[0_20px_50px_rgba(0,0,0,0.2)]">
+                                            <div className="overflow-hidden rounded-sm">
+                                                {/* 修正: ファイル名を 'shohin_ywrg.pngpng' に変更 */}
+                                                <img 
+                                                    src="shohin_ywrg.pngpng" 
+                                                    alt="和らぎの商品イメージ" 
+                                                    className="w-full h-[450px] object-cover object-center transform transition duration-1000 group-hover:scale-105" 
+                                                    onError={(e) => {
+                                                        e.currentTarget.onerror = null; 
+                                                        e.currentTarget.src = "https://images.unsplash.com/photo-1608248597279-f99d160bfbc8?auto=format&fit=crop&q=80&w=1000"; 
+                                                    }}
+                                                />
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div className="md:w-1/2">
+                                        <div className="flex items-center gap-4 mb-6">
+                                            <div className={`w-12 h-12 rounded-full border border-slate-200 flex items-center justify-center ${currentTheme.text}`}>
+                                                <FlaskConical size={20} strokeWidth={1.5} />
+                                            </div>
+                                            <span className={`text-sm tracking-[0.2em] ${theme.accent}`}>PRODUCT</span>
+                                        </div>
+                                        <h3 className="text-3xl font-bold mb-6 leading-tight">
+                                            化粧品・プロダクト開発<br/>
+                                            <span className={`text-lg font-normal ${currentTheme.subText}`}>OEM・オリジナルブランド</span>
+                                        </h3>
+                                        <p className={`text-lg leading-loose mb-8 ${currentTheme.subText} font-light`}>
+                                            機能性と感性を満たす化粧品、および香料雑貨の企画・開発・製造・販売を行っています。
+                                            特にリネンサプライ向け柔軟剤や、ホテルアメニティとしてのオリジナルフレグランス開発において、
+                                            クライアント様のブランド価値を高める製品を提供します。
+                                        </p>
+                                        <ul className={`space-y-4 ${currentTheme.text}`}>
+                                            {["柔軟剤・洗剤の企画開発", "オリジナル香料の調合", "OEM生産管理", "販売戦略サポート"].map((item, i) => (
+                                                <li key={i} className="flex items-center group/item">
+                                                    <span className={`w-8 h-[1px] ${theme.accentBg} mr-4 transition-all group-hover/item:w-12`}></span>
+                                                    {item}
+                                                </li>
+                                            ))}
+                                        </ul>
+                                    </div>
+                                </div>
+
+                                {/* Business 2: Salon & Consulting - Reverted to First Image */}
+                                <div className="flex flex-col md:flex-row-reverse items-center gap-16 group">
+                                    <div className="md:w-1/2 relative p-4">
+                                        <div className="relative rounded-sm shadow-2xl bg-white transition-all duration-300 hover:shadow-[0_20px_50px_rgba(0,0,0,0.2)]">
+                                            <div className="overflow-hidden rounded-sm">
+                                                <img 
+                                                    src="https://images.unsplash.com/photo-1544161515-4ab6ce6db874?auto=format&fit=crop&q=80&w=1000" 
+                                                    alt="Salon Management" 
+                                                    className="w-full h-[450px] object-cover object-center transform transition duration-1000 group-hover:scale-105" 
+                                                    onError={(e) => { e.currentTarget.src = "https://images.unsplash.com/photo-1600334129128-685c5582fd35?auto=format&fit=crop&q=80&w=1000"; }}
+                                                />
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div className="md:w-1/2">
+                                        <div className="flex items-center gap-4 mb-6">
+                                            <div className={`w-12 h-12 rounded-full border border-slate-200 flex items-center justify-center ${currentTheme.text}`}>
+                                                <Sparkles size={20} strokeWidth={1.5} />
+                                            </div>
+                                            <span className={`text-sm tracking-[0.2em] ${theme.accent}`}>SALON & CONSULTING</span>
+                                        </div>
+                                        <h3 className="text-3xl font-bold mb-6 leading-tight">
+                                            店舗経営・コンサルティング
+                                        </h3>
+                                        <p className={`text-lg leading-loose mb-8 ${currentTheme.subText} font-light`}>
+                                            エステティックサロンの経営、および新規店舗開発のコンサルティングを行います。
+                                            路面店からホテル内スパまで、実店舗運営（和らぎ等）で培ったノウハウを基に、
+                                            収益性の高いビジネスモデルの構築とオペレーション改善を支援します。
+                                        </p>
+                                        <ul className={`space-y-4 ${currentTheme.text}`}>
+                                            {["サロン運営受託", "技術・接遇研修", "店舗開発支援"].map((item, i) => (
+                                                <li key={i} className="flex items-center group/item">
+                                                    <span className={`w-8 h-[1px] ${theme.primaryBg} mr-4 transition-all group-hover/item:w-12 opacity-50`}></span>
+                                                    {item}
+                                                </li>
+                                            ))}
+                                        </ul>
+                                    </div>
+                                </div>
+
+                                {/* Business 3: Inbound & Tourism */}
+                                <div className="flex flex-col md:flex-row items-center gap-16 group">
+                                    <div className="md:w-1/2 relative p-4">
+                                        <div className="relative rounded-sm shadow-2xl bg-white transition-all duration-300 hover:shadow-[0_20px_50px_rgba(0,0,0,0.2)]">
+                                            <div className="overflow-hidden rounded-sm">
+                                                <img 
+                                                    src="https://images.unsplash.com/photo-1528360983277-13d9b152c6d1?auto=format&fit=crop&q=80&w=1000" 
+                                                    alt="Inbound Tourism Kyoto" 
+                                                    className="w-full h-[450px] object-cover object-center transform transition duration-1000 group-hover:scale-105" 
+                                                    onError={(e) => { e.currentTarget.src = "https://images.unsplash.com/photo-1493976040374-85c8e12f0c0e?auto=format&fit=crop&q=80&w=1000"; }}
+                                                />
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div className="md:w-1/2">
+                                        <div className="flex items-center gap-4 mb-6">
+                                            <div className={`w-12 h-12 rounded-full border border-slate-200 flex items-center justify-center ${currentTheme.text}`}>
+                                                <Globe size={20} strokeWidth={1.5} />
+                                            </div>
+                                            <span className={`text-sm tracking-[0.2em] ${theme.accent}`}>INBOUND</span>
+                                        </div>
+                                        <h3 className="text-3xl font-bold mb-6 leading-tight">
+                                            観光・インバウンド支援
+                                        </h3>
+                                        <p className={`text-lg leading-loose mb-8 ${currentTheme.subText} font-light`}>
+                                            外国人観光客に対し、日本文化の真髄を伝える情報提供サービスを展開。
+                                            また、日本国内居住のための生活支援やコンサルティング業務、飲食店の経営を通じて、
+                                            国際的な文化交流の架け橋となります。
+                                        </p>
+                                        <ul className={`space-y-4 ${currentTheme.text}`}>
+                                            {["インバウンド向け情報発信", "居住・生活支援", "飲食店経営"].map((item, i) => (
+                                                <li key={i} className="flex items-center group/item">
+                                                    <span className={`w-8 h-[1px] ${theme.primaryBg} mr-4 transition-all group-hover/item:w-12 opacity-50`}></span>
+                                                    {item}
+                                                </li>
+                                            ))}
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    {/* Company Profile */}
+                    <section id="company" className={`py-32 ${isDarkMode ? 'bg-black/20' : 'bg-slate-50'}`}>
+                        <div className="max-w-4xl mx-auto px-6">
+                            <div className="text-center mb-16">
+                                <span className={`block text-sm font-bold tracking-[0.3em] ${theme.accent} mb-3`}>COMPANY</span>
+                                <h2 className="text-3xl font-bold mb-4 tracking-wide">会社概要</h2>
+                            </div>
+
+                            <div className={`${currentTheme.card} ${currentTheme.shadow} rounded-sm overflow-hidden border-t-4 border-[#2C3E50]`}>
+                                <div className="p-10 md:p-16">
+                                    <dl className="divide-y divide-gray-100">
+                                        <div className="grid grid-cols-1 md:grid-cols-3 py-6 gap-4">
+                                            <dt className={`font-bold flex items-center ${theme.primary} tracking-widest`}><Building2 size={16} className="mr-3 opacity-50"/> 会社名</dt>
+                                            <dd className={`md:col-span-2 ${currentTheme.subText} font-medium`}>アムズコーポレーション株式会社</dd>
+                                        </div>
+                                        <div className="grid grid-cols-1 md:grid-cols-3 py-6 gap-4">
+                                            <dt className={`font-bold flex items-center ${theme.primary} tracking-widest`}><MapPin size={16} className="mr-3 opacity-50"/> 登記住所</dt>
+                                            <dd className={`md:col-span-2 ${currentTheme.subText} font-medium leading-relaxed`}>
+                                                〒604-8427<br />
+                                                京都府京都市中京区西ノ京右馬寮町7番地22
+                                            </dd>
+                                        </div>
+                                        <div className="grid grid-cols-1 md:grid-cols-3 py-6 gap-4">
+                                            <dt className={`font-bold flex items-center ${theme.primary} tracking-widest`}><Building2 size={16} className="mr-3 opacity-50"/> 法人番号</dt>
+                                            <dd className={`md:col-span-2 ${currentTheme.subText} font-medium`}>9130001080805</dd>
+                                        </div>
+                                        <div className="grid grid-cols-1 md:grid-cols-3 py-6 gap-4">
+                                            <dt className={`font-bold flex items-center ${theme.primary} tracking-widest`}><Sparkles size={16} className="mr-3 opacity-50"/> 事業内容</dt>
+                                            <dd className={`md:col-span-2 ${currentTheme.subText} text-sm leading-loose font-medium`}>
+                                                1. 外国人に対する観光地、日本文化の紹介及び情報提供サービス<br/>
+                                                2. 外国人に対する日本国内居住のためのコンサルタント業務及びその支援事業<br/>
+                                                3. 飲食店の経営<br/>
+                                                4. エステティックサロンの経営、店舗開発及びコンサルタント業務<br/>
+                                                5. 化粧品の開発、製造及び販売<br/>
+                                                6. 前各号に附帯関連する一切の事業
+                                            </dd>
+                                        </div>
+                                    </dl>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    {/* Contact Section */}
+                    <section id="contact" className={`py-32 ${theme.primaryBg} text-white relative overflow-hidden`}>
+                        <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-white/5 rounded-full blur-[100px] transform translate-x-1/2 -translate-y-1/2 pointer-events-none"></div>
+                        <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-[#C0392B]/20 rounded-full blur-[100px] transform -translate-x-1/2 translate-y-1/2 pointer-events-none"></div>
+
+                        <div className="max-w-4xl mx-auto px-6 relative z-10">
+                            <div className="text-center mb-16">
+                                <h2 className="text-3xl md:text-4xl font-bold mb-6 tracking-widest">Contact Us</h2>
+                                <p className="text-slate-300 font-light tracking-wide">
+                                    製品開発のご依頼、お取引に関するお問い合わせは<br className="md:hidden"/>こちらのフォームより承ります。
+                                </p>
+                            </div>
+
+                            {/* 修正：Formspree対応のため、actionとmethodを追加し、各inputにname属性を追加しました */}
+                            {/* 重要：下の action="..." の中身を、Formspreeで取得したあなたのURLに書き換えてください */}
+                            <form 
+                                action="https://formspree.io/f/xkozqdrb" 
+                                method="POST" 
+                                className="space-y-8 bg-white/5 p-8 md:p-12 rounded-sm backdrop-blur-sm border border-white/10 shadow-2xl"
+                            >
+                                <div className="grid md:grid-cols-2 gap-8">
+                                    <div>
+                                        <label className="block text-xs font-bold tracking-widest text-slate-300 mb-3">お名前 <span className="text-[#C0392B]">*</span></label>
+                                        <input 
+                                            type="text" 
+                                            name="name" 
+                                            required
+                                            className="w-full px-4 py-4 rounded-sm bg-white/10 border border-white/10 text-white placeholder-slate-500 focus:outline-none focus:ring-1 focus:ring-white/50 transition font-serif"
+                                            placeholder="例：山田 太郎"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block text-xs font-bold tracking-widest text-slate-300 mb-3">メールアドレス <span className="text-[#C0392B]">*</span></label>
+                                        <input 
+                                            type="email" 
+                                            name="email"
+                                            required
+                                            className="w-full px-4 py-4 rounded-sm bg-white/10 border border-white/10 text-white placeholder-slate-500 focus:outline-none focus:ring-1 focus:ring-white/50 transition font-serif"
+                                            placeholder="info@ams-corp.jp"
+                                        />
+                                    </div>
+                                </div>
+                                <div>
+                                    <label className="block text-xs font-bold tracking-widest text-slate-300 mb-3">お問い合わせ内容 <span className="text-[#C0392B]">*</span></label>
+                                    <textarea 
+                                        name="message"
+                                        rows={5}
+                                        required
+                                        className="w-full px-4 py-4 rounded-sm bg-white/10 border border-white/10 text-white placeholder-slate-500 focus:outline-none focus:ring-1 focus:ring-white/50 transition font-serif"
+                                        placeholder="ご用件をご記入ください"
+                                    ></textarea>
+                                </div>
+                                <div className="text-center pt-8">
+                                    <button 
+                                        type="submit" 
+                                        className={`px-16 py-4 bg-white text-[#2C3E50] font-bold tracking-widest rounded-sm hover:bg-gray-100 transition transform hover:translate-y-[-2px] shadow-lg w-full md:w-auto`}
+                                    >
+                                        送信する
+                                    </button>
+                                </div>
+                            </form>
+
+                            <div className="mt-20 flex flex-col items-center gap-4 text-slate-300 font-light">
+                                <div className="text-xl font-bold tracking-widest text-white border-b border-white/20 pb-4 mb-2">
+                                    アムズコーポレーション株式会社
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    {/* Footer */}
+                    <footer className={`py-12 text-center text-xs tracking-widest ${isDarkMode ? 'bg-[#151e26] text-slate-500' : 'bg-white text-slate-400 border-t border-slate-100'}`}>
+                        <div className="flex justify-center items-center gap-2 mb-4 opacity-50">
+                            <div className={`w-4 h-4 ${theme.accentBg} rounded-sm`}></div>
+                            <span className="font-bold">Ams Corp.</span>
+                        </div>
+                        <p>&copy; {new Date().getFullYear()} Ams Corporation. All Rights Reserved.</p>
+                    </footer>
+                </div>
+            );
+        };
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>
