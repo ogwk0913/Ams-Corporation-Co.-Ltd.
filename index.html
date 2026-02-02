@@ -232,16 +232,20 @@
                             </div>
 
                             <div className="space-y-32">
-                                {/* Business 1: Product Development */}
+                                {/* Business 1: Product Development - Updated with User Image */}
                                 <div className="flex flex-col md:flex-row items-center gap-16 group">
                                     <div className="md:w-1/2 relative p-4">
                                         <div className="relative rounded-sm shadow-2xl bg-white transition-all duration-300 hover:shadow-[0_20px_50px_rgba(0,0,0,0.2)]">
                                             <div className="overflow-hidden rounded-sm">
-                                                {/* ここで画像ファイルを shohin_ywrg.pngに指定します */}
+                                                {/* 修正: ファイル名を 'shohin_ywrg.png' (GitHub上の名前) に戻します */}
                                                 <img 
                                                     src="shohin_ywrg.png" 
                                                     alt="和らぎの商品イメージ" 
                                                     className="w-full h-[450px] object-cover object-center transform transition duration-1000 group-hover:scale-105" 
+                                                    onError={(e) => {
+                                                        e.currentTarget.onerror = null; 
+                                                        e.currentTarget.src = "https://images.unsplash.com/photo-1608248597279-f99d160bfbc8?auto=format&fit=crop&q=80&w=1000"; 
+                                                    }}
                                                 />
                                             </div>
                                         </div>
@@ -273,7 +277,7 @@
                                     </div>
                                 </div>
 
-                                {/* Business 2: Salon & Consulting */}
+                                {/* Business 2: Salon & Consulting - Reverted to First Image */}
                                 <div className="flex flex-col md:flex-row-reverse items-center gap-16 group">
                                     <div className="md:w-1/2 relative p-4">
                                         <div className="relative rounded-sm shadow-2xl bg-white transition-all duration-300 hover:shadow-[0_20px_50px_rgba(0,0,0,0.2)]">
