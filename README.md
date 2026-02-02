@@ -1,0 +1,1 @@
+# Ams-Corporation-Co.-Ltd.
