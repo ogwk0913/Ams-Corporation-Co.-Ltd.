@@ -232,20 +232,16 @@
                             </div>
 
                             <div className="space-y-32">
-                                {/* Business 1: Product Development - Updated with User Image */}
+                                {/* Business 1: Product Development */}
                                 <div className="flex flex-col md:flex-row items-center gap-16 group">
                                     <div className="md:w-1/2 relative p-4">
                                         <div className="relative rounded-sm shadow-2xl bg-white transition-all duration-300 hover:shadow-[0_20px_50px_rgba(0,0,0,0.2)]">
                                             <div className="overflow-hidden rounded-sm">
-                                                {/* 修正: ファイル名を 'shohin_ywrg.pngpng' に変更 */}
+                                                {/* 安全のため、一旦元のWeb画像に戻してサイトの表示を復旧させます */}
                                                 <img 
-                                                    src="shohin_ywrg.pngpng" 
-                                                    alt="和らぎの商品イメージ" 
+                                                    src="https://images.unsplash.com/photo-1608248597279-f99d160bfbc8?auto=format&fit=crop&q=80&w=1000" 
+                                                    alt="Cosmetic Development Lab" 
                                                     className="w-full h-[450px] object-cover object-center transform transition duration-1000 group-hover:scale-105" 
-                                                    onError={(e) => {
-                                                        e.currentTarget.onerror = null; 
-                                                        e.currentTarget.src = "https://images.unsplash.com/photo-1608248597279-f99d160bfbc8?auto=format&fit=crop&q=80&w=1000"; 
-                                                    }}
                                                 />
                                             </div>
                                         </div>
@@ -277,7 +273,7 @@
                                     </div>
                                 </div>
 
-                                {/* Business 2: Salon & Consulting - Reverted to First Image */}
+                                {/* Business 2: Salon & Consulting */}
                                 <div className="flex flex-col md:flex-row-reverse items-center gap-16 group">
                                     <div className="md:w-1/2 relative p-4">
                                         <div className="relative rounded-sm shadow-2xl bg-white transition-all duration-300 hover:shadow-[0_20px_50px_rgba(0,0,0,0.2)]">
@@ -416,8 +412,7 @@
                                 </p>
                             </div>
 
-                            {/* 修正：Formspree対応のため、actionとmethodを追加し、各inputにname属性を追加しました */}
-                            {/* 重要：下の action="..." の中身を、Formspreeで取得したあなたのURLに書き換えてください */}
+                            {/* Formspree Form */}
                             <form 
                                 action="https://formspree.io/f/xkozqdrb" 
                                 method="POST" 
